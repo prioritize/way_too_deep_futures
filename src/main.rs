@@ -1,4 +1,4 @@
-use std::future::Future;
+use std::{future::Future, time::Duration};
 
 use color_eyre::Report;
 use reqwest::Client;
@@ -14,15 +14,13 @@ fn type_name_of<T>(_: &T) -> &'static str {
 #[tokio::main]
 async fn main() -> Result<(), Report> {
     setup()?;
-    info!("Building that fetch future...");
     let client = Client::new();
-    let fut = fetch_thing(&client, URL_1);
-    info!(
-        type_name = type_name_of(&fut),
-        "That fetch future has a type ..."
-    );
-    fut.await;
-    info!("Done awaiting that dumb future");
+    let fut1 = fetch_thing(&client, URL_1);
+    tokio::spawn(fut1);
+    let fut2 = fetch_thing(&client, URL_2);
+    tokio::spawn(fut2);
+
+    tokio::time::sleep(Duration::from_secs(1)).await;
     Ok(())
 }
 fn setup() -> Result<(), Report> {
