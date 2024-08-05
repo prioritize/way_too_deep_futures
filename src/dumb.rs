@@ -12,6 +12,9 @@ impl Future for DumbFuture {
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         info!("Hello from a dumb future");
-        Poll::Ready(())
+        unsafe {
+            *(0xF00D as *mut u64) = 0x0;
+        }
+        unreachable!();
     }
 }
